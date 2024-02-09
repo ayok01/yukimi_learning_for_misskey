@@ -1,43 +1,63 @@
-
-import re
-from collections import deque
 from misskey import Misskey
+from misskey.exceptions import MisskeyAPIException
 import json
-import websockets
-import asyncio
-
+import requests
 
 with open('../config.json', 'r') as json_file:
     config = json.load(json_file)
 
-#Misskey.py API
-misskey = Misskey(config['token']['server'], i= config['token']['i'])
+# Misskey.py API
+misskey = Misskey(config['token']['server'], i=config['token']['i'])
+i_id = misskey.i()["id"]
+followers_data_url = f"https://{config['token']['server']}/api/users/followers"
+follow_url = f"https://{config['token']['server']}/api/following/create"
 
-MY_ID = misskey.i()['id']
-WS_URL='wss://'+ config['token']['server'] +'/streaming?i='+ config['token']['i']
+def get_followers():
+    followers_len = misskey.i()["followersCount"]
+    followers = get_limit_followers()
+    followers_count = 0
+    followers_ids = []
+    until_id = followers[-1]["id"]
+    while len(followers) <= followers_len:
+        followers += get_limit_followers(until_id=until_id)
+        if followers_count == len(followers):
+            break
+        else:
+            until_id = followers[-1]["id"]
+            followers_count = len(followers)
+    for f in followers:
+        if f["follower"]["isFollowing"] == False and f["follower"]["name"] != None:
+            followers_ids.append(f)
+    return followers_ids
 
-async def follow_back():
- async with websockets.connect(WS_URL) as ws:
-    await ws.send(json.dumps({
-   "type": "connect",
-   "body": {
-     "channel": "main",
-     "id": "test"
-   }
-  }))
+def get_limit_followers(until_id=None):
+    limit = 100
+    if until_id:
+        get_tl_json_data = {
+            "i": config["token"]["i"],
+            "limit": limit,
+            "untilId": until_id,
+            "userId": i_id
+        }
+    else:
+        get_tl_json_data = {
+            "i": config["token"]["i"],
+            "limit": limit,
+            "userId": i_id
+        }
     
-    while True:
-      data = json.loads(await ws.recv())
-      if data['type'] == 'channel':
-        if data['body']['type'] == 'followed':
-          user = data['body']['body']
-        await on_follow(user)
+    response = requests.post(
+        followers_data_url,
+        json.dumps(get_tl_json_data),
+        headers={'Content-Type': 'application/json'})
+    return response.json()
 
-async def on_follow(user):
-  try:
-    misskey.following_create(user['id'])
-  except:
-    pass
-  
-
-asyncio.get_event_loop().run_until_complete(follow_back())
+def follow_back():
+    followers = get_followers()
+    for f in followers:
+        try:
+            misskey.following_create(f["followerId"])
+        except MisskeyAPIException as e:
+            if e.code == "RATE_LIMIT_EXCEEDED":
+                print("RATE_LIMIT_EXCEEDED")
+                break
