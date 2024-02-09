@@ -47,7 +47,6 @@ def get_tl_misskey():
     line = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", choice_text)
     line = re.sub(r'@.*', "", line)
     line = re.sub(r'#.*', "", line)
-    line = re.sub(r':.*', "", line)
     line = re.sub(r"<[^>]*?>", "", line)
     line = re.sub(r"\(.*", "", line)
     line = line.replace('\\', "")
