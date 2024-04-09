@@ -15,8 +15,6 @@ class Config(object):
     SCHEDULER_API_ENABLED = True
 
 @sched.scheduled_job('cron', id='note', minute='*/10')
-@sched.scheduled_job('cron', id='follow_back', minute='*/60')
-
 def cron_note():
     text = get_tl_misskey()
     while text == "None" or text == '':
@@ -25,6 +23,7 @@ def cron_note():
     post_word = change_yukimi(text)
     note(post_word)
 
+@sched.scheduled_job('cron', id='follow_back', minute='*/59')
 def cron_follow_back():
     follow_back()
 
