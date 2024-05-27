@@ -3,11 +3,11 @@ from misskey.exceptions import MisskeyAPIException
 import json
 import requests
 import os
-
+print(os.environ['SERVER'])
 misskey = Misskey(os.environ['SERVER'], i=os.environ['TOKEN'])
 i_id = misskey.i()["id"]
-followers_data_url = f"https://{config['token']['server']}/api/users/followers"
-follow_url = f"https://{config['token']['server']}/api/following/create"
+followers_data_url = f"https://{os.environ['SERVER']}/api/users/followers"
+follow_url = f"https://{os.environ['SERVER']}/api/following/create"
 
 def get_followers():
     followers_len = misskey.i()["followersCount"]
