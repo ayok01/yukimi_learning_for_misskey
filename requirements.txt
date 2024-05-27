@@ -3,3 +3,4 @@ jaconv
 numpy
 unidic-lite
 apscheduler
+Misskey.py
