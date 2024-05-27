@@ -18,9 +18,9 @@ jobs:
           architecture: 'x64'
       - name: test env
         run: |
-          echo "(1) ths is env=$SERVER"
+          echo "(1) ths is env=$ENV_1"
         env: 
-          ENV_1: ${{github.ref}}
+          ENV_1: ${{secrets.SERVER}}
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run Python
