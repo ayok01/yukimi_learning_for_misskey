@@ -7,7 +7,7 @@ def mk_mecab_list(word):
 
 def judgement_sentence(sentence_word):
     text_list = []
-    with open("../data/ngword.txt", encoding='utf-8') as data:
+    with open("./data/ngword.txt", encoding='utf-8') as data:
         for line in data:
             text = line.replace('\n','')
             text_list.append(text)
