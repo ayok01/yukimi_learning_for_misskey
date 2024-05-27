@@ -31,14 +31,14 @@ def get_limit_followers(until_id=None):
     limit = 100
     if until_id:
         get_tl_json_data = {
-            "i": config["token"]["i"],
+            "i": os.environ['TOKEN'],
             "limit": limit,
             "untilId": until_id,
             "userId": i_id
         }
     else:
         get_tl_json_data = {
-            "i": config["token"]["i"],
+            "i": os.environ['TOKEN'],
             "limit": limit,
             "userId": i_id
         }

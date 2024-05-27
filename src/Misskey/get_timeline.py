@@ -17,10 +17,10 @@ import requests
 misskey = Misskey(os.environ['SERVER'], i=os.environ['TOKEN'])
 
 #Misskey API json request用
-get_tl_url = "https://" + config['token']['server'] + "/api/notes/timeline"
+get_tl_url = "https://" + os.environ['SERVER'] + "/api/notes/timeline"
 limit = 30
 get_tl_json_data = {
-    "i" : config["token"]["i"],
+    "i" : os.environ['TOKEN'],
     "limit": limit,
 }
 
