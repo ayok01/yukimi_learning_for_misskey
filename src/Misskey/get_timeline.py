@@ -13,7 +13,7 @@ from misskey import Misskey
 import json
 import requests
 
-with open('../config.json', 'r') as json_file:
+with open('./config.json', 'r') as json_file:
     config = json.load(json_file)
 
 #Misskey.py API

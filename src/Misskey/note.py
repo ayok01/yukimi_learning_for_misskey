@@ -11,7 +11,7 @@ from misskey import Misskey
 import json
 
 
-with open('../config.json', 'r') as json_file:
+with open('./config.json', 'r') as json_file:
     config = json.load(json_file)
 misskey = Misskey(config['token']['server'], i= config['token']['i'])
 
