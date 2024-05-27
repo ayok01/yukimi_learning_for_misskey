@@ -2,12 +2,9 @@ from misskey import Misskey
 from misskey.exceptions import MisskeyAPIException
 import json
 import requests
+import os
 
-with open('./config.json', 'r') as json_file:
-    config = json.load(json_file)
-
-# Misskey.py API
-misskey = Misskey(config['token']['server'], i=config['token']['i'])
+misskey = Misskey(os.environ['SERVER'], i=os.environ['TOKEN'])
 i_id = misskey.i()["id"]
 followers_data_url = f"https://{config['token']['server']}/api/users/followers"
 follow_url = f"https://{config['token']['server']}/api/following/create"

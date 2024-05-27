@@ -1,5 +1,6 @@
 # 1つ上のディレクトリの絶対パスを取得し、sys.pathに登録する
 import sys
+import os
 from os.path import dirname
 parent_dir = dirname(dirname(__file__))
 if parent_dir not in sys.path:
@@ -13,11 +14,7 @@ from misskey import Misskey
 import json
 import requests
 
-with open('./config.json', 'r') as json_file:
-    config = json.load(json_file)
-
-#Misskey.py API
-misskey = Misskey(config['token']['server'], i= config['token']['i'])
+misskey = Misskey(os.environ['SERVER'], i=os.environ['TOKEN'])
 
 #Misskey API json request用
 get_tl_url = "https://" + config['token']['server'] + "/api/notes/timeline"
