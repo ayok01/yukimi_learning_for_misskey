@@ -1,13 +1,12 @@
-name: Yukimi
+name: Note
 
 on:
-  push:
-    branches: 
-      - feature/githubactions
-  workflow_dispatch:
+  schedule:
+    # 定期実行する時間・・・①
+    - cron: "*/10 * * * *"
 
 jobs:
-  yukimi-test:
+ note:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -19,7 +18,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Run Python
-        run: python src/main.py
+        run: python src/cron_note.py
         env: 
           SERVER: ${{secrets.SERVER}}
           TOKEN: ${{secrets.TOKEN}}

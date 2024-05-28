@@ -7,14 +7,8 @@ from Misskey.note import note
 from yukimi_text.yukimi_text import change_yukimi
 import logging
 
-logging.basicConfig(level=logging.DEBUG)
+loggi.ngbasicConfig(level=logging.DEBUG)
 
-
-sched = BlockingScheduler()
-class Config(object):
-    SCHEDULER_API_ENABLED = True
-
-@sched.scheduled_job('cron', id='note', minute='*/10')
 def cron_note():
     text = get_tl_misskey()
     while text == "None" or text == '':
@@ -23,9 +17,5 @@ def cron_note():
     post_word = change_yukimi(text)
     note(post_word)
 
-@sched.scheduled_job('cron', id='follow_back', minute='*/59')
-def cron_follow_back():
-    follow_back()
+cron_note()
 
-if __name__ == "__main__":
-    sched.start()

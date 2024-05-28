@@ -1,0 +1,24 @@
+name: Followback
+
+on:
+  schedule:
+    # 定期実行する時間・・・①
+    - cron: "59 * * * *"
+
+jobs:
+  followback:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Setup Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.8'
+          architecture: 'x64'
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+      - name: Run Python
+        run: python src/cron_follow_back.py
+        env: 
+          SERVER: ${{secrets.SERVER}}
+          TOKEN: ${{secrets.TOKEN}}
