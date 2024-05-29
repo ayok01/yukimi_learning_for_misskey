@@ -31,16 +31,10 @@ def get_tl_misskey():
         get_tl_url,
         json.dumps(get_tl_json_data),
         headers={'Content-Type': 'application/json'})
-    hash = response.json()
-    choice_note = random.choice(hash)
+    post_hash_list = response.json()
+    choice_note = random.choice(post_hash_list)
     choice_id = str(choice_note["id"]) 
     choice_text = str(choice_note["text"])
-    ###
-    #URLその他もろもろ除外
-    # Todo 
-    #とりあえずいらんもの除外しまくったので後で整理
-    #
-    ###
     line = re.sub(r'https?://[\w/:%#\$&\?\(\)~\.=\+\-…]+', "", choice_text)
     line = re.sub(r'@.*', "", line)
     line = re.sub(r'#.*', "", line)
@@ -55,23 +49,20 @@ def get_tl_misskey():
     line = line.replace(' ', "")
     mfm_judge = list(line)
     for one_letter in mfm_judge:
-        if(one_letter == '$'):
-            return "None"
-    try:
-        if choice_note['reactions']['❤'] == 1:
-            return "None"
-    except KeyError:
-        #自分自身の投稿を除外
-        if choice_note["user"]["username"] == "YukimiLearning" or choice_note['cw'] != None:
-            return "None"
-        #フォロワー限定投稿を除外
-        elif choice_note["visibility"] == "followers":
-            return "None"
-        #センシティブワード検知
-        elif judgement_sentence(line) != True and line != "None" and line != "":
-            misskey.notes_reactions_create(choice_id,"❤️")
-            return(line)
-        else:
-            return "None"
-    
-# print(get_tl_misskey())
+        if one_letter == '$':
+            get_tl_misskey()
+
+    if 'myReaction' in choice_note:
+        get_tl_misskey()
+    #自分自身の投稿を除外
+    if choice_note["user"]["username"] == "Yukimilearning" or choice_note['cw'] != None:
+        get_tl_misskey()
+    #フォロワー限定投稿を除外
+    elif choice_note["visibility"] == "followers":
+        get_tl_misskey()
+    #センシティブワード検知
+    elif judgement_sentence(line) != True and line != "None" and line != "":
+        misskey.notes_reactions_create(choice_id,"❤️")
+        return(line)
+    else:
+        get_tl_misskey()

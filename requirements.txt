@@ -2,5 +2,4 @@ mecab-python3
 jaconv
 numpy
 unidic-lite
-apscheduler
 Misskey.py
