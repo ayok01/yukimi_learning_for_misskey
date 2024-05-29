@@ -7,7 +7,7 @@ from Misskey.note import note
 from yukimi_text.yukimi_text import change_yukimi
 import logging
 
-logging.ngbasicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.DEBUG)
 
 def cron_follow_back():
     follow_back()
