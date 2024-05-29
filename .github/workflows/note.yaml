@@ -1,13 +1,13 @@
 name: Note
 
 on:
-  push:
-    branches:
-      - feature/githubactions
-  schedule:
-    # 定期実行する時間・・・①
-    - cron: "*/10 * * * *"
-  workflow_dispatch:
+  #push:
+  #  branches:
+  #    - feature/githubactions
+  #schedule:
+  #  # 定期実行する時間・・・①
+  #  - cron: "*/10 * * * *"
+  #workflow_dispatch:
 
 jobs:
  note:

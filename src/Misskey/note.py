@@ -6,7 +6,7 @@ parent_dir = dirname(dirname(__file__))
 if parent_dir not in sys.path:
     sys.path.append(parent_dir) 
 
-from ngword_filter import judgement_sentence
+from ngword_filter import is_ngword
 import numpy as np
 from misskey import Misskey
 import json
@@ -15,5 +15,5 @@ misskey = Misskey(os.environ['SERVER'], i=os.environ['TOKEN'])
 
 
 def note(sentence):
-    if judgement_sentence(sentence) != True:
+    if is_ngword(sentence) != True:
         misskey.notes_create(sentence)

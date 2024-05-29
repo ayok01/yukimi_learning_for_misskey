@@ -5,7 +5,7 @@ def mk_mecab_list(word):
     tagger  = MeCab.Tagger("-Owakati")
     return(tagger.parse(word).split())
 
-def judgement_sentence(sentence_word):
+def is_ngword(sentence_word):
     text_list = []
     with open("./data/ngword.txt", encoding='utf-8') as data:
         for line in data:
@@ -18,3 +18,4 @@ def judgement_sentence(sentence_word):
         for j_text in text_list:
             if jaconv.hira2kata(j_text) == i:
                 return True
+    return False

@@ -8,12 +8,12 @@ if parent_dir not in sys.path:
 
 import re
 from collections import deque
-from ngword_filter import judgement_sentence
+from ngword_filter import is_ngword
 import random
 from misskey import Misskey
 import json
 import requests
-
+import time
 misskey = Misskey(os.environ['SERVER'], i=os.environ['TOKEN'])
 
 #Misskey API json request用
@@ -32,6 +32,12 @@ def get_tl_misskey():
         json.dumps(get_tl_json_data),
         headers={'Content-Type': 'application/json'})
     post_hash_list = response.json()
+    #print(post_hash_list)
+    import pdb; pdb.set_trace()
+    for i in post_hash_list:
+        if not 'myReaction' in i:
+            print(i)
+    time.sleep(100)
     choice_note = random.choice(post_hash_list)
     choice_id = str(choice_note["id"]) 
     choice_text = str(choice_note["text"])
@@ -51,18 +57,21 @@ def get_tl_misskey():
     for one_letter in mfm_judge:
         if one_letter == '$':
             get_tl_misskey()
-
-    if 'myReaction' in choice_note:
-        get_tl_misskey()
     #自分自身の投稿を除外
     if choice_note["user"]["username"] == "Yukimilearning" or choice_note['cw'] != None:
         get_tl_misskey()
     #フォロワー限定投稿を除外
-    elif choice_note["visibility"] == "followers":
+    if choice_note["visibility"] == "followers":
         get_tl_misskey()
     #センシティブワード検知
-    elif judgement_sentence(line) != True and line != "None" and line != "":
-        misskey.notes_reactions_create(choice_id,"❤️")
-        return(line)
-    else:
+    if is_ngword(line) == True or line == "None" or line == "":
         get_tl_misskey()
+    try:
+        if not 'myReaction' in choice_note:
+            misskey.notes_reactions_create(choice_id,"❤️")
+            return(line)
+        else:
+            get_tl_misskey()
+    except:
+        get_tl_misskey()
+    

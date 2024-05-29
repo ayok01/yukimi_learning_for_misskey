@@ -1,5 +1,4 @@
 ### main.py
-from apscheduler.schedulers.blocking import BlockingScheduler
 import time
 from Misskey.follow_back import follow_back
 from Misskey.get_timeline import get_tl_misskey
