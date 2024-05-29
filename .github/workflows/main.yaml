@@ -1,9 +1,13 @@
 name: Followback
 
 on:
+  push:
+    branches:
+      - feature/githubactions
   schedule:
     # 定期実行する時間・・・①
     - cron: "59 * * * *"
+  workflow_dispatch:
 
 jobs:
   followback:
