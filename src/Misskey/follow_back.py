@@ -2,6 +2,8 @@ from misskey import Misskey
 from misskey.exceptions import MisskeyAPIException
 import json
 import requests
+from logging import getLogger
+logger = getLogger(__name__)
 
 with open('../config.json', 'r') as json_file:
     config = json.load(json_file)

@@ -1,7 +1,9 @@
 import random
 import MeCab
+from logging import getLogger
 
 def change_yukimi(text):
+    logger = getLogger(__name__)
     tagger = MeCab.Tagger()
     if random.randint(0, 3) == 0:
         analyzed_tweets = ["…"] * random.randint(1, 4) # 文頭に25%の確率で三点リーダを付ける
@@ -9,6 +11,7 @@ def change_yukimi(text):
         analyzed_tweets = []
     node = tagger.parseToNode(text)
 
+    logger.info(node)
     while node:
         part_of_speech = ''
         analyzed_tweets.append(node.surface)
@@ -24,4 +27,5 @@ def change_yukimi(text):
     if random.randint(0, 7) == 0:
         analyzed_tweets.append("…" * random.randint(1, 4) + "ふふ" + "…" * random.randint(1, 4))
 
+    logger.info("".join(analyzed_tweets))
     return "".join(analyzed_tweets)
