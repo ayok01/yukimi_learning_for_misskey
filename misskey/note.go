@@ -21,7 +21,7 @@ func NewCreateNoteRequest(text, visibility string) *CreateNoteRequest {
 	}
 }
 
-func (c *Client) CreateNote(request *CreateNoteRequest) error {
+func (c *Client) CreateNote(request CreateNoteRequest) error {
 	url := "https://" + c.ApiUrl + "/api/notes/create"
 
 	// リクエストボディを作成

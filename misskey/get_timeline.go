@@ -25,7 +25,7 @@ type Note struct {
 
 // GetTimeline はタイムラインを取得する
 func (c *Client) GetTimeline(request TimelineRequest, timelineType string) ([]Note, error) {
-	url := c.ApiUrl + "/api/notes/timeline"
+	url := "https://" + c.ApiUrl + "/api/notes/timeline"
 	if timelineType == "local" {
 		url = "https://" + c.ApiUrl + "/api/notes/local-timeline"
 	}

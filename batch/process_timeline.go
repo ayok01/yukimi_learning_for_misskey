@@ -1,7 +1,6 @@
 package batch
 
 import (
-	"fmt"
 	"log"
 	"time"
 
@@ -10,7 +9,7 @@ import (
 	"github.com/ayok01/yukimi_learning_for_misskey/yukimi_text"
 )
 
-// ProcessTimeline はタイムラインを取得してノートを加工するバッチ処理
+// ProcessTimeline はタイムラインを取得してノートを加工して投稿するバッチ処理を行う関数
 func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTextProcessor) {
 	// ノート取得ユースケースを初期化
 	noteUsecase := usecase.NewNoteUsecase(client)
@@ -32,31 +31,32 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 		}
 
 		// ランダムなノートを取得
-		randomNote, err := noteUsecase.GetRandomNote(request, "local")
+		randomNote, err := noteUsecase.GetRandomNote(request, "home")
 		if err != nil {
 			log.Printf("Error getting random note: %v", err)
-			continue
+		} else if randomNote == nil || randomNote.Text == "" {
+			log.Println("No valid random note available or text is empty.")
+		} else {
+			// ノートのテキストを加工
+			processedText, err := textProcessorUsecase.ProcessNoteText(randomNote.Text)
+			if err != nil {
+				log.Printf("Error processing text: %v", err)
+			} else if processedText == "" {
+				log.Println("Processed text is empty.")
+			} else {
+				// ノートを投稿
+				note := misskey.CreateNoteRequest{
+					Text:       processedText,
+					Visibility: "public",
+				}
+				err = client.CreateNote(note)
+				if err != nil {
+					log.Printf("Error creating note: %v", err)
+				} else {
+					log.Println("Note created successfully.")
+				}
+			}
 		}
-		if randomNote == nil {
-			log.Println("No random note available.")
-			continue
-		}
-
-		// noteが空の場合はスキップ
-		if randomNote.Text == "" {
-			log.Println("Random note text is empty.")
-			continue
-		}
-
-		// ノートのテキストを加工
-		processedText, err := textProcessorUsecase.ProcessNoteText(randomNote.Text)
-		if err != nil {
-			log.Printf("Error processing text: %v", err)
-			continue
-		}
-
-		// 加工後のテキストを出力
-		fmt.Printf("Processed Text: %s\n", processedText)
 
 		// 10分待機
 		log.Println("Batch process completed. Waiting for 10 minutes...")
