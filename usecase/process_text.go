@@ -26,6 +26,24 @@ func (u *TextProcessorUsecase) ProcessNoteText(text string) (string, error) {
 		return "", err
 	}
 
+	// テキストの中にURLが含まれている場合はnilを返す
+	if yukimi_text.ContainsURL(processedText) {
+		log.Println("Processed text contains URL.")
+		return "", nil
+	}
+
+	// テキストの中に:emoji_name:の形式の絵文字が含まれている場合はnilを返す
+	if yukimi_text.ContainsEmoji(processedText) {
+		log.Println("Processed text contains emoji.")
+		return "", nil
+	}
+
+	// テキストの中に@user_nameの形式のユーザー名が含まれている場合はnilを返す
+	if yukimi_text.ContainsUserName(processedText) {
+		log.Println("Processed text contains user name.")
+		return "", nil
+	}
+
 	// NGワードを含む場合はnilを返す
 	ngWordFilePath := "./data/ngword.txt"
 	ngWords, err := yukimi_text.LoadNGWords(ngWordFilePath)

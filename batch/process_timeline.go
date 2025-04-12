@@ -44,7 +44,13 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 			} else if processedText == "" {
 				log.Println("Processed text is empty.")
 			} else {
-				log.Println("Creating note with processed text...", processedText)
+				// ノートにリアクションを追加
+				createReactionRequest := misskey.CreateReactionRequest{
+					NoteID:   randomNote.ID,
+					Reaction: "❤️",
+				}
+				log.Println("Creating reaction...", createReactionRequest.NoteID)
+				// err = client.CreateReaction(createReactionRequest)
 				// ノートを投稿
 				// note := misskey.CreateNoteRequest{
 				// 	Text:       processedText,
@@ -56,6 +62,7 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 				// } else {
 				// 	log.Println("Note created successfully.")
 				// }
+				log.Println("Creating note with processed text...", processedText)
 			}
 		}
 
