@@ -1,7 +1,6 @@
 package yukimi_text
 
 import (
-	"fmt"
 	"log"
 	"math/rand"
 	"strings"
@@ -45,7 +44,7 @@ func (p *YukimiTextProcessor) ChangeYukimiText(text string) (string, error) {
 	for {
 		features := strings.Split(node.Feature(), ",")
 		if features[0] != BOSEOS {
-			fmt.Printf("%s %s\n", node.Surface(), node.Feature())
+			// fmt.Printf("%s %s\n", node.Surface(), node.Feature())
 		}
 		if node.Surface() != "" {
 			analyzedTweets = append(analyzedTweets, node.Surface())
