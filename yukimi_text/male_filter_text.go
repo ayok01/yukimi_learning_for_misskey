@@ -3,6 +3,7 @@ package yukimi_text
 import (
 	"bufio"
 	"os"
+	"regexp"
 	"strings"
 )
 
@@ -44,7 +45,8 @@ func ContainsNGWord(text string, ngWords []string) bool {
 func ContainsURL(text string) bool {
 	// URLの正規表現パターン
 	urlPattern := `(?i)\b(?:https?://|www\.)\S+\b`
-	return strings.Contains(text, urlPattern)
+	re := regexp.MustCompile(urlPattern)
+	return re.MatchString(text)
 }
 
 // テキストの中に:emoji_name:の形式の絵文字が含まれているかをチェックします

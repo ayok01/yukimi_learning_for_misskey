@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/ayok01/yukimi_learning_for_misskey/model"
 )
 
 // TimelineRequest はタイムライン取得のリクエスト構造体
@@ -19,10 +21,13 @@ type TimelineRequest struct {
 
 // Note はMisskeyのノート構造体
 type Note struct {
-	ID         string `json:"id"`
-	Text       string `json:"text"`
-	Visibility string `json:"visibility"`
-	LocalOnly  bool   `json:"localOnly"`
+	ID         string         `json:"id"`
+	Text       string         `json:"text"`
+	Visibility string         `json:"visibility"`
+	LocalOnly  bool           `json:"localOnly"`
+	User       model.User     `json:"user"`
+	Reactions  map[string]int `json:"reactions"`
+	MyReaction string         `json:"myReaction"`
 }
 
 // GetTimeline はタイムラインを取得する

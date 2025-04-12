@@ -17,6 +17,13 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 	// テキスト加工ユースケースを初期化
 	textProcessorUsecase := usecase.NewTextProcessorUsecase(textProcessor)
 
+	// 自分のユーザー情報を取得
+	user, err := client.GetMe(misskey.GetMeRequest{I: client.ApiToken})
+	if err != nil {
+		log.Printf("Error getting user: %v", err)
+		return
+	}
+
 	// 10分ごとに処理を実行するループ
 	for {
 		log.Println("Starting batch process...")
@@ -31,7 +38,7 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 		}
 
 		// ランダムなノートを取得
-		randomNote, err := noteUsecase.GetRandomNote(request, "home")
+		randomNote, err := noteUsecase.GetRandomNote(request, "home", user)
 		if err != nil {
 			log.Printf("Error getting random note: %v", err)
 		} else if randomNote == nil || randomNote.Text == "" {
