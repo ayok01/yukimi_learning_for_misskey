@@ -44,17 +44,18 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 			} else if processedText == "" {
 				log.Println("Processed text is empty.")
 			} else {
+				log.Println("Creating note with processed text...", processedText)
 				// ノートを投稿
-				note := misskey.CreateNoteRequest{
-					Text:       processedText,
-					Visibility: "public",
-				}
-				err = client.CreateNote(note)
-				if err != nil {
-					log.Printf("Error creating note: %v", err)
-				} else {
-					log.Println("Note created successfully.")
-				}
+				// note := misskey.CreateNoteRequest{
+				// 	Text:       processedText,
+				// 	Visibility: "public",
+				// }
+				// err = client.CreateNote(note)
+				// if err != nil {
+				// 	log.Printf("Error creating note: %v", err)
+				// } else {
+				// 	log.Println("Note created successfully.")
+				// }
 			}
 		}
 
