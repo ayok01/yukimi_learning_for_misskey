@@ -23,9 +23,9 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 
 		// タイムラインリクエストを作成
 		request := misskey.TimelineRequest{
-			WithFiles:    true,
-			WithRenotes:  true,
-			WithReplies:  true,
+			WithFiles:    false,
+			WithRenotes:  false,
+			WithReplies:  false,
 			Limit:        10,
 			AllowPartial: true,
 		}
@@ -37,6 +37,7 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 		} else if randomNote == nil || randomNote.Text == "" {
 			log.Println("No valid random note available or text is empty.")
 		} else {
+			log.Printf("Random note ID: %s, Text: %s", randomNote.ID, randomNote.Text)
 			// ノートのテキストを加工
 			processedText, err := textProcessorUsecase.ProcessNoteText(randomNote.Text)
 			if err != nil {
@@ -48,20 +49,27 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 				createReactionRequest := misskey.CreateReactionRequest{
 					NoteID:   randomNote.ID,
 					Reaction: "❤️",
+					I:        client.ApiToken,
 				}
 				log.Println("Creating reaction...", createReactionRequest.NoteID)
-				// err = client.CreateReaction(createReactionRequest)
+				err = client.CreateReaction(createReactionRequest)
+				if err != nil {
+					log.Printf("Error creating reaction: %v", err)
+				} else {
+					log.Println("Reaction created successfully.")
+				}
 				// ノートを投稿
-				// note := misskey.CreateNoteRequest{
-				// 	Text:       processedText,
-				// 	Visibility: "public",
-				// }
-				// err = client.CreateNote(note)
-				// if err != nil {
-				// 	log.Printf("Error creating note: %v", err)
-				// } else {
-				// 	log.Println("Note created successfully.")
-				// }
+				note := misskey.CreateNoteRequest{
+					Text:       processedText,
+					Visibility: "public",
+					I:          client.ApiToken,
+				}
+				err = client.CreateNote(note)
+				if err != nil {
+					log.Printf("Error creating note: %v", err)
+				} else {
+					log.Println("Note created successfully.")
+				}
 				log.Println("Creating note with processed text...", processedText)
 			}
 		}

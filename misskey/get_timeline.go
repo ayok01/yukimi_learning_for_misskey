@@ -22,6 +22,7 @@ type Note struct {
 	ID         string `json:"id"`
 	Text       string `json:"text"`
 	Visibility string `json:"visibility"`
+	LocalOnly  bool   `json:"localOnly"`
 }
 
 // GetTimeline はタイムラインを取得する

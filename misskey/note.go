@@ -11,6 +11,7 @@ import (
 type CreateNoteRequest struct {
 	Text       string `json:"text"`
 	Visibility string `json:"visibility"`
+	I          string `json:"i"` // APIトークン
 	// 追加のフィールドが必要な場合はここに追加
 }
 

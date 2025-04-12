@@ -14,7 +14,7 @@ type CreateReactionRequest struct {
 }
 
 func (c *Client) CreateReaction(request CreateReactionRequest) error {
-	url := "https://" + c.ApiUrl + "/api/reactions/create"
+	url := "https://" + c.ApiUrl + "/api/notes/reactions/create"
 
 	// リクエストボディを作成
 	body, err := json.Marshal(request)

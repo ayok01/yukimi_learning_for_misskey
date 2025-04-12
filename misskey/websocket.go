@@ -107,8 +107,6 @@ func (c *Client) WebSocketConnect() error {
 				}
 			}
 		}
-
-		log.Printf("受信したメッセージ: %s", message)
 	}
 
 	return nil
