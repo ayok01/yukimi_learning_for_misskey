@@ -62,3 +62,10 @@ func ContainsUserName(text string) bool {
 	userNamePattern := `@[a-zA-Z0-9_]+`
 	return strings.Contains(text, userNamePattern)
 }
+
+// 　テキストの中に…の形式の三点リーダが含まれているかをチェックします
+func ContainsThreeDots(text string) bool {
+	// …の正規表現パターン
+	threeDotsPattern := `…`
+	return !strings.Contains(text, threeDotsPattern)
+}

@@ -58,5 +58,12 @@ func (u *TextProcessorUsecase) ProcessNoteText(text string) (string, error) {
 		return "", nil
 	}
 
+	// テキストの中に…が含まれている場合はnilを返す
+	yukimiText := yukimi_text.ContainsThreeDots(processedText)
+	if yukimiText {
+		log.Println("Processed text contains three dots.")
+		return "", nil
+	}
+
 	return processedText, nil
 }
