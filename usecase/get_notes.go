@@ -67,7 +67,7 @@ func (u *NoteUsecase) GetRandomNote(request misskey.TimelineRequest, timelineTyp
 			continue
 		}
 
-		log.Println("Random note found:", candidateNote.ID, candidateNote.Text, candidateNote.User.UserID, candidateNote.Visibility, candidateNote.LocalOnly)
+		log.Println("Random note found:", "candidateNote.ID", candidateNote.ID, "text:", candidateNote.Text, "visibility:", candidateNote.Visibility, "localOnly:", candidateNote.LocalOnly, "userID:", candidateNote.User.UserID, "myReaction:", candidateNote.MyReaction)
 
 		// 条件を満たすノートが見つかった場合
 		randomNote = &candidateNote
