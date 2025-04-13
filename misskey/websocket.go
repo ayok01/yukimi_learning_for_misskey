@@ -5,6 +5,9 @@ import (
 	"log"
 	"time"
 
+	"github.com/ayok01/yukimi_learning_for_misskey/usecase"
+	"github.com/ayok01/yukimi_learning_for_misskey/yukimi_text"
+	"github.com/bluele/mecab-golang"
 	"github.com/gorilla/websocket"
 )
 
@@ -18,7 +21,8 @@ type WebSocketResponse struct {
 	Data string `json:"data"`
 }
 
-func (c *Client) WebSocketConnect() error {
+func (c *Client) WebSocketConnect(mecab *mecab.MeCab) error {
+
 	const retryInterval = 5 * time.Second
 
 	for {
@@ -32,7 +36,7 @@ func (c *Client) WebSocketConnect() error {
 		}
 
 		// メッセージの受信を開始
-		if err := c.handleWebSocketMessages(conn); err != nil {
+		if err := c.handleWebSocketMessages(conn, mecab); err != nil {
 			log.Printf("WebSocketエラー: %v", err)
 			log.Println("再接続を試みます...")
 			time.Sleep(retryInterval)
@@ -51,7 +55,7 @@ func (c *Client) connectWebSocket() (*websocket.Conn, error) {
 	return conn, nil
 }
 
-func (c *Client) handleWebSocketMessages(conn *websocket.Conn) error {
+func (c *Client) handleWebSocketMessages(conn *websocket.Conn, mecab *mecab.MeCab) error {
 	defer conn.Close()
 
 	channelID := "user-follow"
@@ -84,6 +88,10 @@ func (c *Client) handleWebSocketMessages(conn *websocket.Conn) error {
 
 		// フォローイベントの処理
 		c.processFollowEvent(response, channelID)
+
+		// リプライイベントの処理
+		c.processReplyEvent(response, channelID, mecab)
+
 	}
 }
 
@@ -118,4 +126,110 @@ func (c *Client) processFollowEvent(response map[string]interface{}, channelID s
 			}
 		}
 	}
+}
+
+// リプライイベントの処理
+func (c *Client) processReplyEvent(response map[string]interface{}, channelID string, mecab *mecab.MeCab) {
+	if response["type"] == "channel" {
+		body, ok := response["body"].(map[string]interface{})
+		if !ok {
+			log.Printf("bodyの解析に失敗しました: %v", response)
+			return
+		}
+
+		if body["id"] == channelID && body["type"] == "notification" {
+			log.Printf("リプライイベントを受信しました: %v", body)
+			innerBody, ok := body["body"].(map[string]interface{})
+			if !ok {
+				log.Printf("innerBodyの解析に失敗しました: %v", body)
+				return
+			}
+
+			if innerBody["type"] == "reply" {
+				userId, _ := innerBody["userId"].(string)
+				user, _ := innerBody["user"].(map[string]interface{})
+				username, _ := user["username"].(string)
+				host, _ := user["host"].(string)
+
+				// リプライ先のノートIDを取得
+				note, _ := innerBody["note"].(map[string]interface{})
+				replyId, _ := note["id"].(string)
+				noteText, _ := note["text"].(string)
+				log.Printf("リプライイベントを受信しました: ユーザーID: %v, ユーザー名: %v, ホスト: %v, テキスト: %v, リプレイID %v", userId, username, host, noteText, replyId)
+
+				timelineRequest := TimelineRequest{
+					WithFiles:    false,
+					WithRenotes:  false,
+					WithReplies:  false,
+					Limit:        10,
+					AllowPartial: true,
+				}
+				notes, err := c.GetTimeline(timelineRequest, "home")
+				if err != nil {
+					log.Printf("タイムラインの取得に失敗しました: %v", err)
+					return
+				}
+
+				getMeRequest := GetMeRequest{
+					I: c.ApiToken,
+				}
+				me, err := c.GetMe(getMeRequest)
+				if err != nil {
+					log.Printf("ユーザー情報の取得に失敗しました: %v", err)
+					return
+				}
+
+				ramdaomNote, err := usecase.GetRandomNote("home", me, notes)
+				if err != nil {
+					log.Printf("ランダムノートの取得に失敗しました: %v", err)
+					return
+				} else if ramdaomNote == nil || ramdaomNote.Text == "" {
+					log.Println("有効なランダムノートが見つかりませんでした")
+					return
+				}
+
+				yukimiText := yukimi_text.NewYukimiTextProcessor(mecab)
+				processedText, err := yukimiText.ChangeYukimiText(ramdaomNote.Text)
+				if err != nil {
+					log.Printf("テキストの加工に失敗しました: %v", err)
+					return
+				}
+				processedText, err = usecase.ProcessNoteText(processedText)
+				if err != nil {
+					log.Printf("ノートのテキスト処理に失敗しました: %v", err)
+					return
+				} else if processedText == "" {
+					log.Println("ノートのテキストが空です")
+					return
+				}
+				// リアクションを作成
+				createReactionRequest := CreateReactionRequest{
+					NoteID:   ramdaomNote.ID,
+					Reaction: "❤️",
+					I:        c.ApiToken,
+				}
+				log.Println("Creating reaction...", createReactionRequest.NoteID)
+				err = c.CreateReaction(createReactionRequest)
+				if err != nil {
+					log.Printf("Error creating reaction: %v", err)
+				} else {
+					log.Println("Reaction created successfully.")
+				}
+				// 新しいノートを作成
+				err = c.CreateNote(CreateNoteRequest{
+					Text:       "@" + username + "@" + host + " " + processedText,
+					Visibility: "public",
+					I:          c.ApiToken,
+					ReplyID:    replyId, // リプライ先のIDを指定
+				})
+				if err != nil {
+					log.Printf("ノートの作成に失敗しました: %v", err)
+					return
+				}
+
+				log.Println("リプライに対するノートを作成しました")
+			}
+		}
+	}
+
 }

@@ -4,24 +4,11 @@ import (
 	"log"
 	"math/rand"
 
-	"github.com/ayok01/yukimi_learning_for_misskey/misskey"
 	"github.com/ayok01/yukimi_learning_for_misskey/model"
 )
 
-type NoteUsecase struct {
-	Client *misskey.Client
-}
-
-func NewNoteUsecase(client *misskey.Client) *NoteUsecase {
-	return &NoteUsecase{Client: client}
-}
-
 // GetRandomNote はタイムラインからランダムなノートを取得します
-func (u *NoteUsecase) GetRandomNote(request misskey.TimelineRequest, timelineType string, me *model.User) (*misskey.Note, error) {
-	notes, err := u.Client.GetTimeline(request, timelineType)
-	if err != nil {
-		return nil, err
-	}
+func GetRandomNote(timelineType string, me *model.User, notes []model.Note) (*model.Note, error) {
 
 	if len(notes) == 0 {
 		log.Println("No notes available.")
@@ -31,7 +18,7 @@ func (u *NoteUsecase) GetRandomNote(request misskey.TimelineRequest, timelineTyp
 	log.Println("Number of notes:", len(notes))
 
 	// ランダムなノートを取得する処理を最大3回試行
-	var randomNote *misskey.Note
+	var randomNote *model.Note
 	for i := 0; i < 3; i++ {
 		randomIndex := rand.Intn(len(notes)) // グローバルな乱数生成器を使用
 		candidateNote := notes[randomIndex]

@@ -35,14 +35,6 @@ func main() {
 	// Misskeyクライアントを初期化
 	client := misskey.NewClient(cfg.ApiToken, cfg.ApiUrl)
 
-	// WebSocket接続を並行して実行
-	go func() {
-		err = client.WebSocketConnect()
-		if err != nil {
-			log.Fatalf("Error connecting to WebSocket: %v", err)
-		}
-	}()
-
 	// MeCabを使ったテキストプロセッサを初期化
 	m, err := mecab.New("-Owakati")
 	if err != nil {
@@ -51,6 +43,14 @@ func main() {
 	defer m.Destroy()
 
 	textProcessor := yukimi_text.NewYukimiTextProcessor(m)
+
+	// WebSocket接続を並行して実行
+	go func() {
+		err = client.WebSocketConnect(m)
+		if err != nil {
+			log.Fatalf("Error connecting to WebSocket: %v", err)
+		}
+	}()
 
 	// バッチ処理を開始
 	batch.ProcessTimeline(client, textProcessor)

@@ -5,6 +5,8 @@ import (
 	"encoding/json"
 	"errors"
 	"net/http"
+
+	"github.com/ayok01/yukimi_learning_for_misskey/model"
 )
 
 type CreateFollowRequest struct {
@@ -35,7 +37,7 @@ func (c *Client) CreateFollow(request *CreateFollowRequest) error {
 	}
 
 	// レスポンスをパース
-	var notes []Note
+	var notes []model.Note
 	if err := json.NewDecoder(resp.Body).Decode(&notes); err != nil {
 		return err
 	}

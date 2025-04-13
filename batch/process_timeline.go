@@ -11,11 +11,8 @@ import (
 
 // ProcessTimeline はタイムラインを取得してノートを加工して投稿するバッチ処理を行う関数
 func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTextProcessor) {
-	// ノート取得ユースケースを初期化
-	noteUsecase := usecase.NewNoteUsecase(client)
 
-	// テキスト加工ユースケースを初期化
-	textProcessorUsecase := usecase.NewTextProcessorUsecase(textProcessor)
+	makeYikimi := yukimi_text.NewYukimiTextProcessor(textProcessor.MeCab)
 
 	// 自分のユーザー情報を取得
 	user, err := client.GetMe(misskey.GetMeRequest{I: client.ApiToken})
@@ -37,8 +34,18 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 			AllowPartial: true,
 		}
 
+		notes, err := client.GetTimeline(request, "home")
+		if err != nil {
+			log.Printf("Error getting timeline: %v", err)
+			continue // エラーが発生した場合は次のループへ
+		}
+		log.Println("Number of notes:", len(notes))
+		if len(notes) == 0 {
+			log.Println("No notes available.")
+			continue // ノートがない場合は次のループへ
+		}
 		// ランダムなノートを取得
-		randomNote, err := noteUsecase.GetRandomNote(request, "home", user)
+		randomNote, err := usecase.GetRandomNote("home", user, notes)
 		if err != nil {
 			log.Printf("Error getting random note: %v", err)
 		} else if randomNote == nil || randomNote.Text == "" {
@@ -48,14 +55,26 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 			processedText := ""
 			// テキストを加工する処理を最大3回試行
 			for attempt := 1; attempt <= maxRetries; attempt++ {
-				processedText, err = textProcessorUsecase.ProcessNoteText(randomNote.Text)
+				yukimiText, err := makeYikimi.ChangeYukimiText(randomNote.Text)
+				if err != nil {
+					log.Printf("Error processing text: %v", err)
+					break // エラーが発生した場合はループを抜ける
+				} else if processedText == "" {
+					break // processedText が空の場合はループを抜ける
+				}
+				processedText, err = usecase.ProcessNoteText(yukimiText)
 				if err != nil {
 					log.Printf("Error processing text: %v", err)
 					break // エラーが発生した場合はループを抜ける
 				} else if processedText == "" {
 					log.Printf("Processed text is empty. Attempt %d/%d. Fetching a new random note...", attempt, maxRetries)
 					// 新しいランダムノートを取得
-					randomNote, err = noteUsecase.GetRandomNote(request, "home", user)
+					notes, err = client.GetTimeline(request, "home")
+					if err != nil {
+						log.Printf("Error getting timeline: %v", err)
+						break // エラーが発生した場合はループを抜ける
+					}
+					randomNote, err = usecase.GetRandomNote("home", user, notes)
 					if err != nil {
 						log.Printf("Error getting random note: %v", err)
 						break // エラーが発生した場合はループを抜ける

@@ -6,3 +6,4 @@ src/__pycache__
 src/Misskey/__pycache__
 src/yukimi_text/__pycache__
 log
+log.jsonl

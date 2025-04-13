@@ -19,19 +19,8 @@ type TimelineRequest struct {
 	I            string `json:"i"`
 }
 
-// Note はMisskeyのノート構造体
-type Note struct {
-	ID         string         `json:"id"`
-	Text       string         `json:"text"`
-	Visibility string         `json:"visibility"`
-	LocalOnly  bool           `json:"localOnly"`
-	User       model.User     `json:"user"`
-	Reactions  map[string]int `json:"reactions"`
-	MyReaction string         `json:"myReaction"`
-}
-
 // GetTimeline はタイムラインを取得する
-func (c *Client) GetTimeline(request TimelineRequest, timelineType string) ([]Note, error) {
+func (c *Client) GetTimeline(request TimelineRequest, timelineType string) ([]model.Note, error) {
 	url := "https://" + c.ApiUrl + "/api/notes/timeline"
 	if timelineType == "local" {
 		url = "https://" + c.ApiUrl + "/api/notes/local-timeline"
@@ -57,7 +46,7 @@ func (c *Client) GetTimeline(request TimelineRequest, timelineType string) ([]No
 	}
 
 	// レスポンスをパース
-	var notes []Note
+	var notes []model.Note
 	if err := json.NewDecoder(resp.Body).Decode(&notes); err != nil {
 		return nil, err
 	}
