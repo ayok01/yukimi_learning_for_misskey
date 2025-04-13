@@ -56,10 +56,18 @@ func (u *NoteUsecase) GetRandomNote(request misskey.TimelineRequest, timelineTyp
 		}
 
 		// noteの公開設定が"public"でない場合はスキップ
-		if candidateNote.Visibility != "public" && candidateNote.LocalOnly {
+		if candidateNote.Visibility != "public" {
 			log.Println("Random note visibility is not public.", candidateNote.Visibility, candidateNote.Text, candidateNote.ID)
 			continue
 		}
+
+		// ノートのローカルフラグがtrueでないことを確認
+		if candidateNote.LocalOnly {
+			log.Println("Random note is local only.")
+			continue
+		}
+
+		log.Println("Random note found:", candidateNote.ID, candidateNote.Text, candidateNote.User.UserID, candidateNote.Visibility, candidateNote.LocalOnly)
 
 		// 条件を満たすノートが見つかった場合
 		randomNote = &candidateNote
