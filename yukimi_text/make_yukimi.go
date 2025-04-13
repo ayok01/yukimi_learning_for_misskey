@@ -52,10 +52,10 @@ func (p *YukimiTextProcessor) ChangeYukimiText(text string) (string, error) {
 
 		if len(features) > 0 {
 			partOfSpeech := features[0]
-			// 副詞または助詞の場合、50%の確率で三点リーダを付ける
+			// 副詞または助詞の場合、25%の確率で三点リーダを付ける
 			if partOfSpeech == "副詞" || partOfSpeech == "助詞" {
 				log.Println("three dots")
-				if rng.Intn(2) == 0 {
+				if rng.Intn(4) == 0 {
 					log.Println("…")
 					for i := 0; i < rand.Intn(4)+1; i++ {
 						analyzedTweets = append(analyzedTweets, "…")
