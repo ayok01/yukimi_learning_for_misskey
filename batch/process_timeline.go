@@ -44,13 +44,34 @@ func ProcessTimeline(client *misskey.Client, textProcessor *yukimi_text.YukimiTe
 		} else if randomNote == nil || randomNote.Text == "" {
 			log.Println("No valid random note available or text is empty.")
 		} else {
-			log.Printf("Random note ID: %s, Text: %s", randomNote.ID, randomNote.Text)
-			// ノートのテキストを加工
-			processedText, err := textProcessorUsecase.ProcessNoteText(randomNote.Text)
-			if err != nil {
-				log.Printf("Error processing text: %v", err)
-			} else if processedText == "" {
-				log.Println("Processed text is empty.")
+			maxRetries := 3
+			processedText := ""
+			// テキストを加工する処理を最大3回試行
+			for attempt := 1; attempt <= maxRetries; attempt++ {
+				processedText, err = textProcessorUsecase.ProcessNoteText(randomNote.Text)
+				if err != nil {
+					log.Printf("Error processing text: %v", err)
+					break // エラーが発生した場合はループを抜ける
+				} else if processedText == "" {
+					log.Printf("Processed text is empty. Attempt %d/%d. Fetching a new random note...", attempt, maxRetries)
+					// 新しいランダムノートを取得
+					randomNote, err = noteUsecase.GetRandomNote(request, "home", user)
+					if err != nil {
+						log.Printf("Error getting random note: %v", err)
+						break // エラーが発生した場合はループを抜ける
+					} else if randomNote == nil || randomNote.Text == "" {
+						log.Println("No valid random note available or text is empty.")
+						break // 有効なノートが取得できない場合もループを抜ける
+					}
+					continue // 再度テキストを加工
+				} else {
+					// 有効な processedText が得られた場合はループを抜ける
+					break
+				}
+			}
+
+			if processedText == "" {
+				log.Println("Failed to process text after maximum retries.")
 			} else {
 				// ノートにリアクションを追加
 				createReactionRequest := misskey.CreateReactionRequest{
